@@ -2,6 +2,15 @@
 
 **Paradox** is a lightweight, hardware-agnostic cognitive architecture for AI agents. It provides a dynamic "Latent Memory" that doesn't just store data but allows for active simulation, evolution, and proximity-based retrieval.
 
+## 🎯 The Main Point
+**"Extreme Efficiency through Abstraction."**
+
+We have too much data and not enough hardware. Paradox solves this by replacing heavy "Real Objects" with lightweight "Latent Vectors", allowing you to perform Supercomputer-scale tasks on a Laptop.
+
+*   **Don't store the Cake** (100MB Object).
+*   **Store the Recipe** (1KB Vector).
+*   **Bake it on demand.**
+
 ## 🚀 Key Features
 
 *   **Hybrid Compute:** Automatically runs on **GPU (PyTorch)** if available, gracefully falls back to **CPU (NumPy/MMap)**.
