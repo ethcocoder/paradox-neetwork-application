@@ -119,6 +119,10 @@ class LatentMemoryEngine:
 
         # Update Vector Store
         if self.backend_type == "numpy":
+            # Check if we are appending to a memmap, which forces a copy to RAM behavior
+            if isinstance(self.vectors, np.memmap):
+                logger.warning("Appending to Memmap in MVP mode: entire dataset is being loaded into RAM.")
+                
             vector = np.array([vector], dtype=np.float32)
             self.vectors = np.vstack([self.vectors, vector])
         elif self.backend_type == "torch":
@@ -133,9 +137,15 @@ class LatentMemoryEngine:
         """
         return self.objects.get(obj_id)
 
-    def query(self, target_vector, k=5):
+    def query(self, target_vector, k=5, metric="euclidean"):
         """
         Find the k neareast neighbors to the target vector.
+        
+        Args:
+            target_vector: Query vector.
+            k (int): Number of results.
+            metric (str): 'euclidean' or 'cosine'.
+            
         Returns a list of (id, distance, attributes) tuples.
         """
         if self.count == 0:
@@ -144,6 +154,22 @@ class LatentMemoryEngine:
         # Ensure target is correct format
         if self.backend_type == "numpy":
             target = np.array(target_vector, dtype=np.float32)
+            
+            if metric == "euclidean":
+                dists = np.linalg.norm(self.vectors - target, axis=1)
+            elif metric == "cosine":
+                # Cosine Dist = 1 - Cosine Sim
+                # Sim = (A . B) / (|A|*|B|)
+                norm_v = np.linalg.norm(self.vectors, axis=1)
+                norm_t = np.linalg.norm(target)
+                # Avoid divide by zero
+                norm_v[norm_v == 0] = 1e-9
+                if norm_t == 0: norm_t = 1e-9
+                
+                sim = np.dot(self.vectors, target) / (norm_v * norm_t)
+                dists = 1 - sim
+            else:
+                raise ValueError(f"Unknown metric: {metric}")
             # Euclidean distance: sqrt(sum((a - b)^2))
             # Or Cosine: dot(a, b) / (norm(a) * norm(b))
             
@@ -159,8 +185,13 @@ class LatentMemoryEngine:
 
         elif self.backend_type == "torch":
             target = self.torch.tensor(target_vector, device=self.device, dtype=self.torch.float32)
-            # Euclidean distance
-            dists = self.torch.norm(self.vectors - target, dim=1)
+            
+            if metric == "euclidean":
+                dists = self.torch.norm(self.vectors - target, dim=1)
+            elif metric == "cosine":
+                 dists = 1 - self.torch.nn.functional.cosine_similarity(self.vectors, target.unsqueeze(0))
+            else:
+                 raise ValueError(f"Unknown metric: {metric}")
             # Get top k
             values, indices = self.torch.topk(dists, k, largest=False)
             

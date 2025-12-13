@@ -65,6 +65,16 @@ sim = SimulationEnv(engine)
 sim.run(steps=100, dynamics_fn=semantic_drift)
 ```
 
+### 4. Visualization
+Visualize your latent space in 2D using PCA or t-SNE.
+
+```python
+from paradox.visualization import LatentVisualizer
+
+viz = LatentVisualizer(engine)
+viz.plot_2d(method="pca", output_file="memory_map.png")
+```
+
 ## 🤝 Contributing
 Open source contributions are welcome. Please submit a PR for review.
 

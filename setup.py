@@ -16,6 +16,7 @@ setup(
     ],
     extras_require={
         "gpu": ["torch>=1.10.0"],
+        "viz": ["matplotlib", "scikit-learn"],
     },
     classifiers=[
         "Programming Language :: Python :: 3",
