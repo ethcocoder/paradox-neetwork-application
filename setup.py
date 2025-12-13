@@ -17,7 +17,7 @@ class CustomInstallCommand(install):
             sys.stdout.write(f"\r\033[92m[{'=' * (i // 2)}{' ' * (50 - i // 2)}] {i}%\033[0m")
             sys.stdout.flush()
         
-        print("\n\n\033[1;32m✔ Paradox Engine Ready.\033[0m")
+        print("\n\n\033[1;32m[OK] Paradox Engine Ready.\033[0m")
         print("\033[90m> \"Don't store what exists, store how it can be generated.\"\033[0m\n")
         
         install.run(self)
@@ -26,7 +26,7 @@ setup(
     name="paradoxlf",
     version="0.1.0",
     description="A latent memory and active inference engine for AI agents.",
-    long_description=open("README.md").read(),
+    long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     author="Natnael Ermiyas (Ethco Coders & Inotrade)",
     author_email="contact@ethcocoder.com",
@@ -48,8 +48,8 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
         "Development Status :: 3 - Alpha",
-        "Framework :: Paradox",
     ],
     python_requires='>=3.7',
 )
