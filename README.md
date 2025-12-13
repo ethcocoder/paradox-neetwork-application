@@ -135,6 +135,12 @@ sim.run(steps=1000, dynamics_fn=traffic_physics)
 # The engine is actively "thinking" and updating state
 ```
 
+### 🎮 Try the Demo
+Watch Paradox manage 1,000 autonomous agents in a traffic simulation:
+```bash
+python examples/traffic_sim_demo.py
+```
+
 ## 🤝 Contributing
 Open source contributions are welcome. Please submit a PR for review.
 
