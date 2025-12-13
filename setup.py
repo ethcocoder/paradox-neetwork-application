@@ -5,8 +5,9 @@ import time
 
 class CustomInstallCommand(install):
     def run(self):
-        print("\n\033[96m=============================================\033[0m")
+        print("\033[96m=============================================\033[0m")
         print("\033[1;96m      P A R A D O X   L A T E N T   F R A M E W O R K \033[0m")
+        print("\033[1;93m      Architected by Natnael Ermiyas (Ethco Coders)     \033[0m")
         print("\033[96m=============================================\033[0m")
         print("\033[94mInitializing Core...\033[0m")
         
