@@ -92,6 +92,40 @@ viz = LatentVisualizer(engine)
 viz.plot_2d(method="pca", output_file="memory_map.png")
 ```
 
+## 💻 How to Use: Library vs Framework
+
+Paradox is designed to be used in two distinct ways depending on your needs.
+
+### 📚 Mode 1: The Library (Static Usage)
+**Use when:** You want a fast vector database or smart storage for your *existing* application.
+*   **You control the loop.** You just push/pull data.
+*   **Example:** Storing million embeddings for a Chatbot.
+
+```python
+from paradox import LatentMemoryEngine
+
+db = LatentMemoryEngine(dimension=512)
+db.add(vector, {"text": "hello"})
+result = db.query(query_vector)
+```
+
+### 🏗️ Mode 2: The Framework (Active Usage)
+**Use when:** You want to build a *living simulation* or agent that evolves on its own.
+*   **Paradox controls the loop.** You define the rules, Paradox moves the world.
+*   **Example:** A traffic simulation where cars (vectors) move closer if they are "jammed".
+
+```python
+from paradox import SimulationEnv
+
+def traffic_physics(vectors, dt, backend):
+    # Custom logic to move vectors based on rules
+    return updated_vectors
+
+sim = SimulationEnv(engine)
+sim.run(steps=1000, dynamics_fn=traffic_physics)
+# The engine is actively "thinking" and updating state
+```
+
 ## 🤝 Contributing
 Open source contributions are welcome. Please submit a PR for review.
 
