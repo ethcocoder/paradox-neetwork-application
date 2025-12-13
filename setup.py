@@ -35,6 +35,7 @@ setup(
     install_requires=[
         "numpy>=1.21.0",
         "psutil>=5.8.0",
+        "Pillow>=9.0.0",
     ],
     extras_require={
         "gpu": ["torch>=1.10.0"],
