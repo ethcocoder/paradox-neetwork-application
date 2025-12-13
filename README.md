@@ -138,7 +138,34 @@ sim.run(steps=1000, dynamics_fn=traffic_physics)
 ### 🎮 Try the Demo
 Watch Paradox manage 1,000 autonomous agents in a traffic simulation:
 ```bash
+### 🎮 Try the Demo
+Watch Paradox manage 1,000 autonomous agents in a traffic simulation:
+```bash
 python examples/traffic_sim_demo.py
+```
+
+## 🎨 Multimedia Support (v0.2.0 Alpha)
+Paradox now supports encoding **Images** and "Dreaming" **Videos** via Latent Interpolation.
+
+### Image Search & Reconstruction
+```python
+from paradox.media import SimpleImageEncoder, SimpleImageDecoder
+from paradox import LatentMemoryEngine
+
+# Encode images into vectors
+encoder = SimpleImageEncoder(64, 64)
+engine = LatentMemoryEngine(dimension=encoder.dimension)
+engine.set_encoder(encoder)
+
+engine.add("my_photo.jpg")
+results = engine.query(encoder.encode("query.jpg"))
+```
+
+### Video Dreaming
+Paradox can generate new video frames by interpolating between two latent states (e.g., "Left" -> "Right").
+```bash
+python examples/video_demo.py
+# Output: dream_video.gif
 ```
 
 ## 🤝 Contributing
