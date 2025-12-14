@@ -194,6 +194,17 @@ Paradox v0.4.0 includes massive optimizations for scale:
 sim.run(steps=1000, dynamics_fn=my_physics, parallel=True)
 ```
 
+## 🖥️ User Interface (v0.5.0)
+Paradox comes with a built-in **Streamlit Dashboard** to visualize your memory.
+
+```bash
+# Install UI dependencies
+pip install paradoxlf[ui]
+
+# Run the Dashboard
+streamlit run paradox/ui/dashboard.py
+```
+
 ## 🤝 Contributing
 Open source contributions are welcome. Please submit a PR for review.
 

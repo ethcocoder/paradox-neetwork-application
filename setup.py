@@ -40,6 +40,7 @@ setup(
     extras_require={
         "gpu": ["torch>=1.10.0"],
         "viz": ["matplotlib", "scikit-learn"],
+        "ui": ["streamlit>=1.10.0", "plotly"],
     },
     cmdclass={
         'install': CustomInstallCommand,
