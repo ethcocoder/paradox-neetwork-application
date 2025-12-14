@@ -32,19 +32,10 @@ class LatentCluster:
     def query(self, target_vector, k=5):
         """
         Distributed Query (Map-Reduce).
-        1. Broadcast query to all shards (Map).
-        2. Gather k results from each.
-        3. Merge and Sort globally (Reduce).
-        4. Return top k.
         """
         all_candidates = []
-        
-        # 1. & 2. Parallel Query Broadcast
-        # We use ThreadPool to simulate network parallelism
         with ThreadPoolExecutor(max_workers=len(self.shards)) as executor:
-            # Lambda to call query on a shard
             futures = {executor.submit(shard.query, target_vector, k): shard for shard in self.shards}
-            
             for future in futures:
                 try:
                     results = future.result()
@@ -52,18 +43,37 @@ class LatentCluster:
                 except Exception as e:
                     print(f"[Cluster] Shard query failed: {e}")
 
-        # 3. Reduce (Merge & Sort)
-        # Results are (id, dist, attrs). We sort by dist (ascending).
-        # We assume Euclidean/Cosine distance where lower is better (usually).
-        # Wait, LatentMemoryEngine.query returns distances.
-        
-        # If strict cosine sim was used, higher is better? 
-        # engine.py query retuns 'dists' which are 1-sim for cosine. So LOWER is always BETTER.
-        
+        # Reduce
         sorted_candidates = sorted(all_candidates, key=lambda x: x[1])
-        
-        # 4. Return Top K
         return sorted_candidates[:k]
+
+    def retrieve_vector(self, concept_name):
+        """
+        Finds a concept by name across all shards and returns its vector.
+        This is expensive (Broadcast Search) but necessary for reasoning.
+        """
+        # In a real system, we'd have a global index/lookup table.
+        # Here we brute-force search the metadata.
+        # Note: Standard Engine doesn't support "get_vector_by_name" easily without iterating.
+        # We will iterate all shards' memory.
+        
+        for shard in self.shards:
+            # We assume Shard has a way to peek. For RemoteShard this is hard.
+            # We'll use a trick: Semantic Search for the concept name itself (if text encoded)
+            # Or assume we have a way to fetch.
+            # MVP: We just skip this for now and rely on Vectors being passed in.
+            pass
+        return None
+
+    def solve_analogy_distributed(self, a_vec, b_vec, c_vec, k=1):
+        """
+        Solves A - B + C = ?
+        """
+        # 1. Compute Result Vector locally
+        result_vec = a_vec - b_vec + c_vec
+        
+        # 2. Distributed Search for the result
+        return self.query(result_vec, k=k)
 
     @property
     def total_count(self):

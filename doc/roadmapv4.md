@@ -97,24 +97,6 @@ Collective understanding
 Knowledge accumulation over time
 System-level intelligence
 
-Phase 6: Distributed Query & Reasoning
-
-Goal:
-Reason across machines as if they were one.
-
-Milestones
-
-Global proximity search
-
-Cross-node semantic queries
-
-Distributed latent reasoning pipelines
-
-Query planning & optimization
-
-Outcome
-
-Massive-scale semantic search
 
 Reasoning beyond single-node limits
 
