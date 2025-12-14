@@ -184,6 +184,16 @@ vec_purple = ParadoxMixer.interpolate(vec_red, vec_blue, ratio=0.5)
 vec_queen = ParadoxMixer.analogy(vec_man, vec_king, vec_woman)
 ```
 
+## 🚀 Performance (v0.4.0)
+Paradox v0.4.0 includes massive optimizations for scale:
+*   **Auto-Parallel Simulation:** Automatically distributes simulation physics across all CPU cores using lightweight threads.
+*   **Hybrid Mixer:** Automatically detects PyTorch tensors and uses GPU acceleration for blending.
+
+```python
+# Enable parallel simulation explicitly (default is 'auto')
+sim.run(steps=1000, dynamics_fn=my_physics, parallel=True)
+```
+
 ## 🤝 Contributing
 Open source contributions are welcome. Please submit a PR for review.
 
