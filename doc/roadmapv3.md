@@ -42,22 +42,19 @@ Phase 2: Text & Semantic Encoding [x]
 [x] Support Sentences/Metadata
 [x] Allow text to act as Query/Modifier
 
-Phase 3: Semantic Proximity Engine
+Phase 3: Semantic Proximity Engine [x]
 
 Goal:
 Move from raw distance → meaningful similarity.
 
 Milestones
 
-Implement semantic distance metrics
+[x] Implement semantic distance metrics (Weighted Euclidean/Cosine)
 
 Support:
 
-Weighted proximity (importance of features)
-
-Context-aware similarity
-
-Introduce latent attention (some dimensions matter more per query)
+[x] Weighted proximity (importance of features)
+[x] Context-aware similarity via Attention vectors
 
 Outcome
 
