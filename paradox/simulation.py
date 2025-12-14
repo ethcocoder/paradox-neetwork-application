@@ -7,6 +7,15 @@ import concurrent.futures
 import multiprocessing
 import numpy as np
 
+# Top-level helper for multiprocessing
+def _parallel_worker(args):
+    """
+    Worker function for parallel step execution.
+    args: (chunk, dynamics_fn, dt)
+    """
+    chunk, dynamics_fn, dt = args
+    return dynamics_fn(chunk, dt, "numpy")
+
 class SimulationEnv:
     def __init__(self, engine):
         """
@@ -16,17 +25,24 @@ class SimulationEnv:
         self.running = False
         self.num_workers = multiprocessing.cpu_count()
         
-    def step(self, dynamics_fn, dt=0.1, parallel=False):
+    def step(self, dynamics_fn, dt=0.1, parallel="auto", executor=None):
         """
         Apply a dynamics function to evolve the latent state.
-        
-        Args:
-            dynamics_fn (callable): Function that takes (vectors, dt, backend) and returns delta_vectors
-            dt (float): Time step delta
-            parallel (bool): If True, use multi-core processing (Numpy backend only).
+        ...
+        executor: Optional ProcessPoolExecutor instance for reuse.
         """
         if self.engine.count == 0:
             return
+
+        # Auto-Tune Parallelism
+        # Based on Threading benchmarks, overhead is negligible.
+        PARALLEL_THRESHOLD = 10000 
+        
+        if parallel == "auto":
+            if self.engine.count > PARALLEL_THRESHOLD:
+                parallel = True
+            else:
+                parallel = False
 
         # If Torch backend (GPU), parallel CPU doesn't make sense, so ignore it.
         # Torch handles parallelism internally on the GPU.
@@ -40,45 +56,59 @@ class SimulationEnv:
                 self.engine.vectors += delta
         else:
             # Multi-processing (CPU only)
-            # Split vectors into chunks
             vectors = self.engine.vectors
             chunk_size = len(vectors) // self.num_workers
             if chunk_size < 1: chunk_size = 1
             
-            chunks = []
+            tasks = []
             for i in range(0, len(vectors), chunk_size):
-                chunks.append(vectors[i:i + chunk_size])
-
-            # Define worker wrapper (must be picklable, so using dynamics_fn directly is tricky if it's a lambda)
-            # Ideally dynamics_fn is a top-level function.
-            def work(chunk):
-                return dynamics_fn(chunk, dt, "numpy")
+                chunk = vectors[i:i + chunk_size]
+                tasks.append((chunk, dynamics_fn, dt))
 
             # Execute in parallel
-            with concurrent.futures.ProcessPoolExecutor(max_workers=self.num_workers) as executor:
-                # We cast back to iterator to force execution
-                results = list(executor.map(work, chunks))
+            if executor:
+                results = list(executor.map(_parallel_worker, tasks))
+            else:
+                # Fallback if no executor provided (slower)
+                with concurrent.futures.ThreadPoolExecutor(max_workers=self.num_workers) as pool:
+                    results = list(pool.map(_parallel_worker, tasks))
             
             # Reassemble results
             if results and results[0] is not None:
                 delta = np.vstack(results)
                 self.engine.vectors += delta
             
-    def run(self, steps, dynamics_fn, dt=0.1, callback=None, parallel=False):
+    def run(self, steps, dynamics_fn, dt=0.1, callback=None, parallel="auto"):
         """
         Run the simulation for a fixed number of steps.
         """
         self.running = True
         logger.info(f"Starting simulation for {steps} steps (Parallel={parallel})...")
         
+        # Resolve Auto
+        if parallel == "auto":
+             if self.engine.count > 100000 and self.engine.backend_type == "numpy":
+                 parallel = True
+             else:
+                 parallel = False
+
+        executor = None
+        if parallel and self.engine.backend_type == "numpy":
+             # Use ThreadPoolExecutor instead of ProcessPool for NumPy workloads
+             # NumPy releases the GIL, so threads are far more efficient (Shared Memory, No Pickling)
+             executor = concurrent.futures.ThreadPoolExecutor(max_workers=self.num_workers)
+
         try:
             for i in range(steps):
                 if not self.running: break
-                self.step(dynamics_fn, dt, parallel=parallel)
+                self.step(dynamics_fn, dt, parallel=parallel, executor=executor)
                 if callback:
                     callback(i, self.engine)
         except KeyboardInterrupt:
             logger.info("Simulation stopped by user.")
+        finally:
+            if executor:
+                executor.shutdown()
         
         self.running = False
         logger.info("Simulation complete.")
