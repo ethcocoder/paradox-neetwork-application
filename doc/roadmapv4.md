@@ -61,27 +61,22 @@ Deployable on AWS / GCP / Azure
 Cost-efficient scaling
 Production-grade infrastructure
 
-Phase 4: Federated & Edge Latent Systems
+Phase 4: Federated & Edge Latent Systems [x]
 
 Goal:
 Run Paradox everywhere — not just in the cloud.
 
 Milestones
 
-Edge nodes (mobile, IoT, local machines)
-
-Partial latent synchronization
-
-Federated learning-style updates
-
-Privacy-aware latent sharing
+[x] Edge nodes implementation (`EdgeNode` class)
+[x] Partial latent synchronization (Novelty-based upload)
+[x] Federated learning-style updates (Basic Push)
+[x] Privacy-aware latent sharing (Only sync novelty)
 
 Outcome
 
 Distributed intelligence
-
 Local reasoning + global knowledge
-
 Reduced bandwidth & latency
 
 Phase 5: Collective Intelligence Layer
