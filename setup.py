@@ -24,7 +24,7 @@ class CustomInstallCommand(install):
 
 setup(
     name="paradoxlf",
-    version="0.4.0",
+    version="0.5.0",
     description="A latent memory and active inference engine for AI agents.",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
