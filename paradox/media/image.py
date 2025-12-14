@@ -54,6 +54,9 @@ class SimpleImageDecoder(BaseDecoder):
             
         # Reshape back to (H, W, 3)
         # Denormalize (0-1 -> 0-255)
+        # IMPORTANT: Clamp values to avoid integer overflow artifacts when predicting outside bounds
+        vector = np.clip(vector, 0.0, 1.0)
+        
         arr = (vector.reshape(self.height, self.width, 3) * 255).astype(np.uint8)
         
         return Image.fromarray(arr)
