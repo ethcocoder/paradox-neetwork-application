@@ -6,8 +6,8 @@ import time
 class CustomInstallCommand(install):
     def run(self):
         print("\033[96m=============================================\033[0m")
-        print("\033[1;96m      P A R A D O X   V 4   A R C H I T E C T U R E       \033[0m")
-        print("\033[1;93m      Distributed Latent Intelligence Engine              \033[0m")
+        print("\033[1;96m      P A R A D O X   V 5   A U T O N O M O U S       \033[0m")
+        print("\033[1;93m      Self-Evolving Latent Intelligence Engine            \033[0m")
         print("\033[96m=============================================\033[0m")
         print("\033[94mInitializing Core...\033[0m")
         
