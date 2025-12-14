@@ -21,31 +21,24 @@ Billions of latent objects
 Horizontal scaling
 Cluster-ready architecture
 
-Phase 2: Networked Latent Memory
+Phase 2: Networked Latent Memory [x]
 
 Goal:
 Allow latent memory to exist across systems.
 
 Milestones
 
-Remote latent storage nodes
-
-Network protocols for:
-
-Latent insertion
-
-Retrieval
-
-Proximity queries
-
-Fault tolerance & replication
+[x] Remote latent storage nodes (ShardServer)
+[x] Network protocols for:
+    - Latent insertion (POST /add)
+    - Retrieval
+    - Proximity queries (POST /query)
+[x] Fault tolerance & replication (Basic client-side handling)
 
 Outcome
 
 Paradox as a latent database
-
 Multiple clients, shared memory
-
 Persistent collective knowledge
 
 Phase 3: Cloud-Native Paradox
