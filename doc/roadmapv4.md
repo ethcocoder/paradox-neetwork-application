@@ -1,34 +1,24 @@
-Phase 1: Distributed Latent Architecture
+Phase 1: Distributed Latent Architecture [x]
 
 Goal:
 Break the single-engine limitation.
 
 Milestones
 
-Design a distributed ProximityEngine
-
-Partition latent space across:
-
-Machines
-
-Processes
-
-Nodes
-
-Support sharding by:
-
-Latent regions
-
-Time
-
-Modality (text/image/video)
+[x] Design a distributed ProximityEngine
+[x] Partition latent space across:
+    - Machines (Simulated)
+    - Processes
+    - Nodes
+[x] Support sharding by:
+    - Latent regions
+    - Time
+    - Modality (text/image/video)
 
 Outcome
 
 Billions of latent objects
-
 Horizontal scaling
-
 Cluster-ready architecture
 
 Phase 2: Networked Latent Memory
