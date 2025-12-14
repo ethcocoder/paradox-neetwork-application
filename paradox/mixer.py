@@ -1,40 +1,43 @@
 import numpy as np
 
+try:
+    import torch
+except ImportError:
+    torch = None
+
 class ParadoxMixer:
     """
     Advanced Latent Space Operations (Blending, Arithmetic, Superposition).
+    Supports both NumPy and PyTorch backends automatically.
     """
     
     @staticmethod
-    def interpolate(vec_a, vec_b, ratio=0.5):
+    def _is_torch(vec):
+        return torch is not None and isinstance(vec, torch.Tensor)
+
+    @classmethod
+    def interpolate(cls, vec_a, vec_b, ratio=0.5):
         """
         Returns a weighted blend of two vectors.
-        ratio 0.0 = vec_a
-        ratio 1.0 = vec_b
         """
+        # Logic remains same for both backends due to operator overloading
         return vec_a * (1 - ratio) + vec_b * ratio
 
-    @staticmethod
-    def add(vec_a, vec_b):
-        """Add two concepts together."""
+    @classmethod
+    def add(cls, vec_a, vec_b):
         return vec_a + vec_b
 
-    @staticmethod
-    def subtract(vec_a, vec_b):
-        """Remove concept B from concept A."""
+    @classmethod
+    def subtract(cls, vec_a, vec_b):
         return vec_a - vec_b
     
-    @staticmethod
-    def analogy(a, b, c):
-        """
-        Solves 'A is to B as C is to ???'
-        Result = B - A + C
-        Example: King - Man + Woman = Queen
-        """
+    @classmethod
+    def analogy(cls, a, b, c):
         return b - a + c
 
-    @staticmethod
-    def noise(vec, magnitude=0.1):
-        """Adds random noise to create a variation."""
-        noise = np.random.normal(0, magnitude, vec.shape)
-        return vec + noise
+    @classmethod
+    def noise(cls, vec, magnitude=0.1):
+        if cls._is_torch(vec):
+            return vec + torch.randn_like(vec) * magnitude
+        else:
+            return vec + np.random.normal(0, magnitude, vec.shape)
