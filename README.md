@@ -168,6 +168,22 @@ python examples/video_demo.py
 # Output: dream_video.gif
 ```
 
+## 🧪 Latent Blending (v0.3.0)
+Paradox v0.3.0 introduces the `ParadoxMixer`, allowing you to perform arithmetic on concepts.
+
+*   **Interpolation:** `ratio=0.5` gives a perfect mix derived from both parents.
+*   **Arithmetic:** `King - Man + Woman = Queen`.
+
+```python
+from paradox import ParadoxMixer
+
+# Mix two concepts
+vec_purple = ParadoxMixer.interpolate(vec_red, vec_blue, ratio=0.5)
+
+# solve analogy
+vec_queen = ParadoxMixer.analogy(vec_man, vec_king, vec_woman)
+```
+
 ## 🤝 Contributing
 Open source contributions are welcome. Please submit a PR for review.
 
