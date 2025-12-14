@@ -41,31 +41,24 @@ Paradox as a latent database
 Multiple clients, shared memory
 Persistent collective knowledge
 
-Phase 3: Cloud-Native Paradox
+Phase 3: Cloud-Native Paradox [x]
 
 Goal:
 Make Paradox cloud-ready by design.
 
 Milestones
 
-Containerized services (Docker-first)
-
-Stateless compute + stateful latent storage
-
-Auto-scaling based on:
-
-Latent density
-
-Query volume
-
-Cloud storage backends support
+[x] Containerized services (Docker-first)
+[x] Stateless compute + stateful latent storage (Persistence Layer)
+[x] Auto-scaling (Defined via Docker Compose replicas)
+    - Latent density
+    - Query volume
+[x] Cloud storage backends support (Local Volume Mounts for MVP)
 
 Outcome
 
 Deployable on AWS / GCP / Azure
-
 Cost-efficient scaling
-
 Production-grade infrastructure
 
 Phase 4: Federated & Edge Latent Systems

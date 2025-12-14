@@ -24,24 +24,25 @@ class CustomInstallCommand(install):
 
 setup(
     name="paradoxlf",
-    version="0.12.0",
+    version="0.13.0",
     description="A latent memory and active inference engine for AI agents.",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
-    author="Natnael Ermiyas (Ethco Coders & Inotrade)",
-    author_email="contact@ethcocoder.com",
-    url="https://github.com/ethcocoder/paradoxlf",
+    author="Ethco Coders",
+    author_email="contact@ethcocoders.com",
     packages=find_packages(),
     install_requires=[
-        "numpy>=1.21.0",
-        "psutil>=5.8.0",
-        "Pillow>=9.0.0",
+        "numpy>=1.20.0",
     ],
     extras_require={
-        "gpu": ["torch>=1.10.0"],
-        "viz": ["matplotlib", "scikit-learn"],
-        "ui": ["streamlit>=1.10.0", "plotly"],
-        "ai": ["sentence-transformers>=2.0.0", "torch>=1.10.0"],
+        "ui": ["streamlit", "plotly"],
+        "ai": ["sentence-transformers", "torch", "transformers"],
+        "server": ["fastapi", "uvicorn", "requests"]
+    },
+    entry_points={
+        'console_scripts': [
+            'paradox-node=paradox.distributed.server:main',
+        ],
     },
     cmdclass={
         'install': CustomInstallCommand,

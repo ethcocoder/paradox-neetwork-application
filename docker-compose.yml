@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  # --- Networked Shards (Storage Nodes) ---
+  shard-1:
+    build: .
+    image: paradox-node:latest
+    command: --id shard-node-1 --port 8000 --dimension 128
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./data/shard-1:/app/persistence
+    networks:
+      - paradox-net
+
+  shard-2:
+    build: .
+    image: paradox-node:latest
+    command: --id shard-node-2 --port 8000 --dimension 128
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./data/shard-2:/app/persistence
+    networks:
+      - paradox-net
+
+  shard-3:
+    build: .
+    image: paradox-node:latest
+    command: --id shard-node-3 --port 8000 --dimension 128
+    ports:
+      - "8003:8000"
+    volumes:
+      - ./data/shard-3:/app/persistence
+    networks:
+      - paradox-net
+
+  # --- Cluster Coordinator / Gateway ---
+  # Ideally, this would be a separate API service that routes to shards.
+  # For now, we can run a "client" container or just expose shards directly.
+  # Let's add a visual dashboard pointing to the cluster.
+  dashboard:
+    build: .
+    command: streamlit run paradox/ui/dashboard.py --server.port 8501
+    ports:
+      - "8501:8501"
+    environment:
+      - PARADOX_SHARDS=http://shard-1:8000,http://shard-2:8000,http://shard-3:8000
+    depends_on:
+      - shard-1
+      - shard-2
+      - shard-3
+    networks:
+      - paradox-net
+
+networks:
+  paradox-net:
+    driver: bridge
