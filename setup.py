@@ -6,8 +6,8 @@ import time
 class CustomInstallCommand(install):
     def run(self):
         print("\033[96m=============================================\033[0m")
-        print("\033[1;96m      P A R A D O X   L A T E N T   F R A M E W O R K \033[0m")
-        print("\033[1;93m      Architected by Natnael Ermiyas (Ethco Coders)     \033[0m")
+        print("\033[1;96m      P A R A D O X   V 4   A R C H I T E C T U R E       \033[0m")
+        print("\033[1;93m      Distributed Latent Intelligence Engine              \033[0m")
         print("\033[96m=============================================\033[0m")
         print("\033[94mInitializing Core...\033[0m")
         
@@ -24,7 +24,7 @@ class CustomInstallCommand(install):
 
 setup(
     name="paradoxlf",
-    version="0.11.0",
+    version="0.12.0",
     description="A latent memory and active inference engine for AI agents.",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
