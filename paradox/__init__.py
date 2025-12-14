@@ -1,10 +1,8 @@
 from .engine import LatentMemoryEngine
-from .simulation import SimulationEnv
-from .visualization import LatentVisualizer
-from .mixer import ParadoxMixer
-# Media (Image/Video) components are available but not imported by default to keep start-up fast
-# unless requested.
+from . import encoder, decoder, visualization
+from .evolution import GeneticOptimizer
+from .autonomous import AutoAgent
+from .safety import GuardRail
 
-__version__ = "0.12.0"
-
-__all__ = ["LatentMemoryEngine", "SimulationEnv", "LatentVisualizer", "ParadoxMixer", "__version__"]
+__version__ = "0.17.0"
+__all__ = ["LatentMemoryEngine", "encoder", "decoder", "visualization", "GeneticOptimizer", "AutoAgent", "GuardRail", "__version__"]
