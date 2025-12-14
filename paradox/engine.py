@@ -170,6 +170,11 @@ class LatentMemoryEngine:
                 dists = 1 - sim
             else:
                 raise ValueError(f"Unknown metric: {metric}")
+            # Euclidean distance: sqrt(sum((a - b)^2))
+            # Or Cosine: dot(a, b) / (norm(a) * norm(b))
+            
+            # Simple Euclidean for MVP
+            dists = np.linalg.norm(self.vectors - target, axis=1)
             # Get top k indices
             nearest_indices = dists.argsort()[:k]
             results = []
