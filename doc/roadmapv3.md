@@ -109,7 +109,7 @@ Forecast future frames/concepts
 Predict object behavior
 Time-aware similarity
 
-Phase 6: Intelligence APIs
+Phase 6: Intelligence APIs [x]
 
 Goal:
 Make Paradox usable as an intelligent system.
@@ -118,15 +118,14 @@ Milestones
 
 High-level APIs:
 
-search_by_concept()
+[x] conceptual_search()
+[x] imagine() (wrapper for blend/interpolate)
+[x] predict_future() (wrapper for temporal prediction)
 
-blend_modalities()
+[ ] Natural language control hooks (Future)
+[ ] Modular plugin system for intelligence layers (Future)
 
-predict_next_state()
-
-Natural language control hooks
-
-Modular plugin system for intelligence layers
+Outcome
 
 Outcome
 

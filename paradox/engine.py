@@ -247,6 +247,53 @@ class LatentMemoryEngine:
                 results.append((idx, dist, self.objects[idx]))
             return results
 
+    # ==========================================
+    # Phase 6: Intelligence APIs (High-Level)
+    # ==========================================
+
+    def conceptual_search(self, concept, k=5):
+        """
+        High-level search. 'concept' can be text, image, or vector.
+        Requires engine to have an encoder set via set_encoder().
+        """
+        if self.encoder is None and not isinstance(concept, (list, np.ndarray)):
+             raise ValueError("Encoder required for conceptual search unless passing raw vector.")
+             
+        if self.encoder and not isinstance(concept, (list, np.ndarray)):
+            # Auto-encode text/image
+            print(f"[Paradox] Encoding concept: {str(concept)[:50]}...")
+            query_vec = self.encoder.encode(concept)
+        else:
+            query_vec = concept
+            
+        return self.query(query_vec, k=k, metric='cosine') # Default to semantic cosine for concepts
+
+    def imagine(self, concept_a, concept_b, ratio=0.5):
+        """
+        Creatively blends two concepts.
+        Returns the latent vector of the new concept.
+        """
+        if self.encoder:
+             if not isinstance(concept_a, (list, np.ndarray)): a_vec = self.encoder.encode(concept_a)
+             else: a_vec = concept_a
+             
+             if not isinstance(concept_b, (list, np.ndarray)): b_vec = self.encoder.encode(concept_b)
+             else: b_vec = concept_b
+        else:
+             a_vec, b_vec = concept_a, concept_b
+             
+        # Import Mixer locally to avoid circular imports at top level if any
+        from .mixer import ParadoxMixer
+        return ParadoxMixer.interpolate(a_vec, b_vec, ratio)
+
+    def predict_future(self, history_vectors, steps=1):
+        """
+        Predicts where the thought process is going based on history.
+        """
+        from .media.temporal import LatentTrajectory
+        traj = LatentTrajectory(history_vectors)
+        return traj.predict_next(steps=steps)
+
     def get_info(self):
         """Returns engine status."""
         return {
