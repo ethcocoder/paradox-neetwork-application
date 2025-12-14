@@ -85,6 +85,44 @@ Paradox is a fundamental engine for **Massive Scale Simulation**:
 | **Scientific Sim** | Simulating millions of particles is slow. | Latent physics allows interacting with millions of entities. |
 | **Big Data** | Searching billions of logs is slow. | Proximity search finds anomalies instantly (O(1) approx). |
 
+## 🌐 Distributed & Networked Memory (v0.12.0+)
+
+Paradox can now scale horizontally across multiple processes or machines.
+
+### 1. Local Cluster (Multi-Threaded)
+Simulate a distributed system on a single machine.
+```python
+from paradox.distributed import LatentCluster
+cluster = LatentCluster(num_shards=4)
+cluster.add(vector) # Round-robin distribution
+cluster.query(vector) # Map-reduce query
+```
+
+### 2. Networked Memory (Client-Server)
+Run shards on different servers (Cloud/Edge).
+
+**Server (Node A):**
+```bash
+# Start a shard server on port 8000
+python -c "from paradox.distributed import start_server; start_server(port=8000)"
+```
+
+**Client (Node B):**
+```python
+from paradox.distributed import RemoteShard
+client = RemoteShard(host="192.168.1.5", port=8000)
+client.add(vector)
+```
+
+**Hybrid Cluster:**
+Combine local and remote shards into one brain.
+```python
+cluster = LatentCluster(num_shards=0)
+cluster.shards.append(RemoteShard(host="node_1"))
+cluster.shards.append(RemoteShard(host="node_2"))
+# Now queries search the entire network!
+```
+
 ## 🤝 Contributing
 Open source contributions are welcome. Please submit a PR for review.
 
