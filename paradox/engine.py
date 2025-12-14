@@ -24,6 +24,7 @@ class LatentMemoryEngine:
         
         self.objects = {}
         self.vectors = None
+        self.buffer = [] # Pending vectors to be merged
         self.count = 0
         
         self.encoder = None # Optional component
@@ -117,19 +118,29 @@ class LatentMemoryEngine:
         attributes['_id'] = obj_id
         self.objects[obj_id] = attributes
 
-        # Update Vector Store
-        if self.backend_type == "numpy":
-            # Check if we are appending to a memmap, which forces a copy to RAM behavior
-            if isinstance(self.vectors, np.memmap):
-                logger.warning("Appending to Memmap in MVP mode: entire dataset is being loaded into RAM.")
-                
-            vector = np.array([vector], dtype=np.float32)
-            self.vectors = np.vstack([self.vectors, vector])
-        elif self.backend_type == "torch":
-            tensor = self.torch.tensor([vector], device=self.device, dtype=self.torch.float32)
-            self.vectors = self.torch.cat([self.vectors, tensor], dim=0)
+        # Update Vector Store (Buffer Strategy)
+        # We delay expensive vstack/concatenation until query time or save
+        self.buffer.append(vector)
             
         return obj_id
+
+    def _sync_buffer(self):
+        """
+        Merges pending vectors in self.buffer into the main self.vectors array.
+        This provides dramatic speedup for sequential adds.
+        """
+        if not self.buffer:
+            return
+
+        new_batch = np.array(self.buffer, dtype=np.float32)
+        
+        if self.backend_type == "numpy":
+            self.vectors = np.vstack([self.vectors, new_batch])
+        elif self.backend_type == "torch":
+            tensor = self.torch.tensor(new_batch, device=self.device, dtype=self.torch.float32)
+            self.vectors = self.torch.cat([self.vectors, tensor], dim=0)
+            
+        self.buffer = [] # Clear buffer
 
     def retrieve(self, obj_id):
         """
@@ -152,6 +163,9 @@ class LatentMemoryEngine:
         """
         if self.count == 0:
             return []
+
+        # Sync any pending inserts before querying
+        self._sync_buffer()
 
         # Ensure target is correct format
         if self.backend_type == "numpy":
