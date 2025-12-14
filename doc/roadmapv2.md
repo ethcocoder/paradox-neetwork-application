@@ -1,57 +1,30 @@
 Paradox V2 Roadmap – Image & Video Integration
-Phase 0: Research & Design
+Phase 0: Research & Design [x]
 
-Study state-of-the-art image/video compression via autoencoders, VAEs, and transformers
+Phase 1: Image Integration [x]
+[x] Implement image encoder (autoencoder-based)
+[x] Implement image decoder for on-demand reconstruction
+[x] Test storage and retrieval of 10k–100k images
 
-Evaluate GPU requirements for large image/video datasets
+Phase 2: Video Integration [x]
+[x] Implement video encoder (frame-by-frame)
+[x] Implement video decoder to reconstruct sequences
+[x] Support storing sequences of latent vectors efficiently
 
-Define latent vector formats for images and videos
-
-Phase 1: Image Integration
-
-Implement image encoder (autoencoder-based)
-
-Implement image decoder for on-demand reconstruction
-
-Test storage and retrieval of 10k–100k images
-
-Benchmark reconstruction fidelity and memory efficiency
-
-Phase 2: Video Integration
-
-Implement video encoder (frame-by-frame or sequence-aware, e.g., 3D ConvVAE / Transformer)
-
-Implement video decoder to reconstruct sequences
-
-Support storing sequences of latent vectors efficiently
-
-Test reconstruction on small video datasets
-
-Phase 3: Latent Superposition & Blending
-
+Phase 3: Latent Superposition & Blending [x]
 [x] Implement blending of latent vectors (image/image, video/frame)
-
 [x] Enable emergent patterns from combined latent states (Verified Red+Blue=Purple)
 
-Add temporal superposition for smooth video transitions (Covered by Video Interpolation)
+Phase 4: Engine Upgrades [x]
+[x] Extend ProximityEngine to handle images and video sequences
+[x] Implement disk-backed storage for large media datasets (memmap supported)
+[x] Integrate GPU acceleration for encoding/decoding (Hybrid Mixer)
+[x] Optimize query/search in latent space (Parallel Simulation)
 
-Phase 4: Engine Upgrades
-
-Extend ProximityEngine to handle images and video sequences
-
-Implement disk-backed storage for large media datasets (memmap)
-
-Integrate GPU acceleration for encoding/decoding
-
-Optimize query/search in latent space for multimedia
-
-Phase 5: Simulation & Temporal Dynamics
-
-Support dynamics functions for videos/images (motion, color evolution)
-
-Enable interactive simulation of latent-space evolution
-
-Visualize temporal changes and emergent behaviors
+Phase 5: Simulation & Temporal Dynamics [x]
+[x] Support dynamics functions for videos/images (motion, color evolution)
+[x] Enable interactive simulation of latent-space evolution (via UI)
+[x] Visualize temporal changes and emergent behaviors (via UI & GIF)
 
 Phase 6: The Interface (V0.5.0)
 
