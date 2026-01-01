@@ -1,0 +1,12 @@
+# Large files
+*.zip
+*.tar.gz
+*.iso
+*.tflite
+metadata.json
+
+# Build artifacts
+/build/
+/mobile/build/
+/backend/__pycache__/
+/node_modules/
