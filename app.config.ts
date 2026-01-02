@@ -51,8 +51,8 @@ const config: ExpoConfig = {
     supportsTablet: true,
     bundleIdentifier: env.iosBundleId,
     "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
-      }
+      "ITSAppUsesNonExemptEncryption": false
+    }
   },
   android: {
     adaptiveIcon: {
@@ -65,6 +65,7 @@ const config: ExpoConfig = {
     predictiveBackGestureEnabled: false,
     package: env.androidPackage,
     permissions: ["POST_NOTIFICATIONS"],
+    googleServicesFile: "./google-services.json",
     intentFilters: [
       {
         action: "VIEW",
@@ -120,15 +121,16 @@ const config: ExpoConfig = {
         },
       },
     ],
+    "@react-native-firebase/app",
   ],
   experiments: {
     typedRoutes: true,
     reactCompiler: true,
   },
-  owner: "natnael1221",
+  owner: "mechanics1221",
   extra: {
     eas: {
-      projectId: "f9bd383a-e90b-42e6-962e-b60ac946488f",
+      projectId: "ff5c0ed2-56b7-4a47-8df0-81ca9b3f9027",
     },
   },
 };

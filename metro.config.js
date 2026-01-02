@@ -1,7 +1,10 @@
 const { getDefaultConfig } = require("expo/metro-config");
 const { withNativeWind } = require("nativewind/metro");
+const path = require("path");
 
-const config = getDefaultConfig(__dirname);
+// Fix for Windows ESM loader issue
+const projectRoot = __dirname;
+const config = getDefaultConfig(projectRoot);
 
 // Add .tflite to asset extensions
 if (!config.resolver.assetExts.includes("tflite")) {
@@ -13,7 +16,5 @@ config.resolver.sourceExts = config.resolver.sourceExts.filter(ext => ext !== "t
 
 module.exports = withNativeWind(config, {
   input: "./global.css",
-  // Force write CSS to file system instead of virtual modules
-  // This fixes iOS styling issues in development mode
   forceWriteFileSystem: true,
 });
