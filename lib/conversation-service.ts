@@ -1,4 +1,15 @@
-import {
+import { Platform } from "react-native";
+import { db } from "./firebase-auth";
+import { COLLECTIONS } from "./firebase-config";
+
+let firestore: any;
+if (Platform.OS === "web") {
+  firestore = require("firebase/firestore");
+} else {
+  firestore = require("@react-native-firebase/firestore").default;
+}
+
+const {
   collection,
   addDoc,
   query,
@@ -10,9 +21,7 @@ import {
   updateDoc,
   orderBy,
   limit,
-} from "firebase/firestore";
-import { db } from "./firebase-auth";
-import { COLLECTIONS } from "./firebase-config";
+} = firestore;
 
 export interface Conversation {
   id?: string;

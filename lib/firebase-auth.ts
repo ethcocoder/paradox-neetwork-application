@@ -21,7 +21,7 @@ if (Platform.OS === "web") {
   const { initializeApp, getApp, getApps } = require("firebase/app");
   const { getAuth, initializeAuth, browserLocalPersistence } = require("firebase/auth");
   const { getFirestore } = require("firebase/firestore");
-  const { firebaseConfig } = require("./firebase-config");
+  const { firebaseConfig } = require("./firebase-config.ts");
 
   const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
   auth = getAuth(app);
