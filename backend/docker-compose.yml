@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: pna_postgres
+    environment:
+      POSTGRES_USER: pna_user
+      POSTGRES_PASSWORD: pna_password
+      POSTGRES_DB: pna_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pna_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: pna_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Backend
+  backend:
+    build: .
+    container_name: pna_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://pna_user:pna_password@postgres:5432/pna_db
+      - REDIS_URL=redis://redis:6379/0
+      - DEBUG=True
+      - ZERO_RATED_DOMAIN=core.pna.et
+      - NORMAL_DOMAIN=api.pna.et
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - ZERO_RATING_ENABLED=True
+      - TELECOM_PARTNER=ethio_telecom
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./app:/app/app
+      - ../paradoxlf:/app/paradoxlf
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  postgres_data:

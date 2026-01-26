@@ -1,8 +1,11 @@
-__pycache__/
-*.pyc
-.DS_Store
-test_storage/
-*.log
-dist/
-build/
-*.egg-info/
+# Large files
+*.zip
+*.tar.gz
+*.iso
+*.tflite
+metadata.json
+
+# Build artifacts
+/build/
+/mobile/build/
+/backend/__pycache__/
