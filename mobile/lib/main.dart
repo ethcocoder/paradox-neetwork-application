@@ -12,6 +12,8 @@ import 'services/local_latent_encoder.dart';
 import 'services/local_latent_decoder.dart';
 import 'providers/auth_provider.dart';
 import 'features/auth/screens/login_screen.dart';
+import 'features/chat/screens/chat_list_screen.dart';
+import 'features/subscription/screens/subscription_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -64,9 +66,8 @@ class ParadoxNetworkApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const LoginScreen(),
-        '/home': (context) => const Scaffold(
-          body: Center(child: Text('Chat List - Coming Soon')),
-        ),
+        '/home': (context) => const ChatListScreen(),
+        '/subscription': (context) => const SubscriptionScreen(),
       },
     );
   }

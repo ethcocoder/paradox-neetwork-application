@@ -1,10 +1,12 @@
 """FastAPI Main Application
 Paradox Network Application Backend
 """
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import time
+import json
+from typing import List, Dict
 
 from app.config import settings
 from app.api.v1 import auth, messages, subscription
@@ -125,6 +127,50 @@ async def get_traffic_stats():
         "telecom_partner": settings.telecom_partner
     }
 
+
+# ==================== WebSocket Manager ====================
+
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: Dict[str, List[WebSocket]] = {}
+
+    async def connect(self, user_id: str, websocket: WebSocket):
+        await websocket.accept()
+        if user_id not in self.active_connections:
+            self.active_connections[user_id] = []
+        self.active_connections[user_id].append(websocket)
+
+    def disconnect(self, user_id: str, websocket: WebSocket):
+        if user_id in self.active_connections:
+            self.active_connections[user_id].remove(websocket)
+            if not self.active_connections[user_id]:
+                del self.active_connections[user_id]
+
+    async def send_personal_message(self, message: dict, user_id: str):
+        if user_id in self.active_connections:
+            for connection in self.active_connections[user_id]:
+                await connection.send_json(message)
+
+    async def broadcast(self, message: dict):
+        for user_id in self.active_connections:
+            for connection in self.active_connections[user_id]:
+                await connection.send_json(message)
+
+manager = ConnectionManager()
+
+@app.websocket("/ws/{user_id}")
+async def websocket_endpoint(websocket: WebSocket, user_id: str):
+    await manager.connect(user_id, websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            # Echo for testing or handle incoming signaling
+            await manager.send_personal_message(
+                {"type": "ack", "data": "Message received"}, 
+                user_id
+            )
+    except WebSocketDisconnect:
+        manager.disconnect(user_id, websocket)
 
 # ==================== Include API Routes ====================
 

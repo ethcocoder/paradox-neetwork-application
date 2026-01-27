@@ -18,6 +18,12 @@ class AppTheme {
   static const Color textHighEmphasis = Color(0xFFFFFFFF);
   static const Color textMediumEmphasis = Color(0xFFA0A0A0);
   static const Color textLowEmphasis = Color(0xFF606060);
+
+  static const Gradient primaryGradient = LinearGradient(
+    colors: [primaryColor, Color(0xFF512DA8)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
   
   // Design Tokens
   static const double borderRadiusL = 24.0;
@@ -25,6 +31,7 @@ class AppTheme {
   static const double borderRadiusS = 12.0;
 
   // Modern Dark Theme
+  static ThemeData get darkTheme => premiumTheme;
   static ThemeData get premiumTheme {
     return ThemeData(
       useMaterial3: true,

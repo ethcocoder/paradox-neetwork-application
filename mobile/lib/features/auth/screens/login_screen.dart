@@ -3,8 +3,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../theme/app_theme.dart';
-import '../../providers/auth_provider.dart';
+import 'package:paradox_network_app/theme/app_theme.dart';
+import 'package:paradox_network_app/providers/auth_provider.dart';
 import 'dart:ui'; // For blur effect
 
 class LoginScreen extends StatefulWidget {

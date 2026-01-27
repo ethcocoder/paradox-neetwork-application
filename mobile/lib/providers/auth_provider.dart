@@ -14,6 +14,7 @@ class AuthProvider with ChangeNotifier {
   AuthProvider(this._authService);
   
   User? get currentUser => _currentUser;
+  User? get user => _currentUser;
   bool get isAuthenticated => _currentUser != null;
   bool get isLoading => _isLoading;
   String? get error => _error;

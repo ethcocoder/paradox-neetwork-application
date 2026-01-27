@@ -39,8 +39,8 @@ dependencies:
   encrypt: ^5.0.3
   crypto: ^3.0.3
 
-  # ON-DEVICE AI/ML
-  tflite_flutter: ^0.10.4
+  # ON-DEVICE AI/ML (Commented out for build stability)
+  # tflite_flutter: ^0.10.4
   image: ^4.1.7
 
   # Utilities
@@ -53,9 +53,9 @@ dependencies:
   image_picker: ^1.0.7
   cached_network_image: ^3.3.1
 
-  # Notification
-  flutter_local_notifications: ^16.3.2
-  firebase_messaging: ^14.7.10
+  # Notification (Removed for MVP build stability)
+  # flutter_local_notifications: ^16.3.2
+  # firebase_messaging: ^14.7.10
 
 dev_dependencies:
   flutter_test:

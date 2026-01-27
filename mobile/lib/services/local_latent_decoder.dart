@@ -1,11 +1,11 @@
 /// Local Latent Decoder - Reconstructs messages from vectors ON DEVICE
 
 import 'dart:typed_data';
-import 'package:tflite_flutter/tflite_flutter.dart';
+// import 'package:tflite_flutter/tflite_flutter.dart';
 
 class LocalLatentDecoder {
-  Interpreter? _textDecoder;
-  Interpreter? _imageDecoder;
+  // Interpreter? _textDecoder;
+  // Interpreter? _imageDecoder;
   
   bool _isInitialized = false;
   Map<String, String> _textCache = {};
@@ -14,22 +14,23 @@ class LocalLatentDecoder {
   Future<void> initialize() async {
     if (_isInitialized) return;
     
-    try {
-      // Load CLIP decoders (if available)
-      _textDecoder = await Interpreter.fromAsset(
-        'assets/models/clip_text_decoder.tflite',
-      );
-      
-      _imageDecoder = await Interpreter.fromAsset(
-        'assets/models/clip_image_decoder.tflite',
-      );
-      
-      _isInitialized = true;
-      print('✅ Local latent decoder initialized');
-    } catch (e) {
-      print('⚠️  TFLite decoders not found, using fallback');
-      _isInitialized = true;
-    }
+    // try {
+    //   // Load CLIP decoders (if available)
+    //   _textDecoder = await Interpreter.fromAsset(
+    //     'assets/models/clip_text_decoder.tflite',
+    //   );
+    //   
+    //   _imageDecoder = await Interpreter.fromAsset(
+    //     'assets/models/clip_image_decoder.tflite',
+    //   );
+    //   
+    //   _isInitialized = true;
+    //   print('✅ Local latent decoder initialized');
+    // } catch (e) {
+    //   print('⚠️  TFLite decoders not found, using fallback');
+    //   _isInitialized = true;
+    // }
+    _isInitialized = true;
   }
   
   /// Decode latent vector back to text
@@ -43,41 +44,41 @@ class LocalLatentDecoder {
       return _textCache[vectorKey]!;
     }
     
-    if (_textDecoder != null) {
-      final decoded = await _decodeTextWithCLIP(latentVector);
-      _textCache[vectorKey] = decoded;
-      return decoded;
-    } else {
+    // if (_textDecoder != null) {
+    //   final decoded = await _decodeTextWithCLIP(latentVector);
+    //   _textCache[vectorKey] = decoded;
+    //   return decoded;
+    // } else {
       // Fallback: Show placeholder
       return _fallbackTextDecoding(latentVector);
-    }
+    // }
   }
   
   /// Decode latent vector back to image
   Future<Uint8List?> decodeImage(List<double> latentVector) async {
     await initialize();
     
-    if (_imageDecoder != null) {
-      return await _decodeImageWithCLIP(latentVector);
-    } else {
+    // if (_imageDecoder != null) {
+    //   return await _decodeImageWithCLIP(latentVector);
+    // } else {
       // Fallback: Generate placeholder
       return _fallbackImageDecoding(latentVector);
-    }
+    // }
   }
   
   // ==================== CLIP-based Decoding ====================
   
-  Future<String> _decodeTextWithCLIP(List<double> latentVector) async {
-    // This would use a text decoder model
-    // For now, return placeholder
-    return '[Text from vector: ${latentVector.take(3).map((v) => v.toStringAsFixed(2)).join(', ')}...]';
-  }
-  
-  Future<Uint8List?> _decodeImageWithCLIP(List<double> latentVector) async {
-    // This would use an image decoder/generator model
-    // For now, return null (will show placeholder in UI)
-    return null;
-  }
+  // Future<String> _decodeTextWithCLIP(List<double> latentVector) async {
+  //   // This would use a text decoder model
+  //   // For now, return placeholder
+  //   return '[Text from vector: ${latentVector.take(3).map((v) => v.toStringAsFixed(2)).join(', ')}...]';
+  // }
+  // 
+  // Future<Uint8List?> _decodeImageWithCLIP(List<double> latentVector) async {
+  //   // This would use an image decoder/generator model
+  //   // For now, return null (will show placeholder in UI)
+  //   return null;
+  // }
   
   // ==================== Fallback Decoding ====================
   
@@ -129,8 +130,8 @@ class LocalLatentDecoder {
   }
   
   void dispose() {
-    _textDecoder?.close();
-    _imageDecoder?.close();
+    // _textDecoder?.close();
+    // _imageDecoder?.close();
   }
 }
 

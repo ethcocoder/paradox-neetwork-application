@@ -1,6 +1,6 @@
 /// Authentication Service
 
-import 'package:flutter_secure_storage.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../core/network/traffic_manager.dart';
 import '../models/user_model.dart';
 
