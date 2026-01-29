@@ -2,16 +2,17 @@
 
 import 'package:flutter/foundation.dart';
 import '../models/user_model.dart';
-import '../services/auth_service.dart';
+import '../services/firebase_service.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 
 class AuthProvider with ChangeNotifier {
-  final AuthService _authService;
+  final FirebaseService _firebaseService;
   
   User? _currentUser;
   bool _isLoading = false;
   String? _error;
   
-  AuthProvider(this._authService);
+  AuthProvider(this._firebaseService);
   
   User? get currentUser => _currentUser;
   User? get user => _currentUser;
@@ -21,7 +22,7 @@ class AuthProvider with ChangeNotifier {
   
   /// Login
   Future<void> login({
-    required String phoneNumber,
+    required String email,
     required String password,
   }) async {
     _isLoading = true;
@@ -29,10 +30,10 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
     
     try {
-      _currentUser = await _authService.login(
-        phoneNumber: phoneNumber,
-        password: password,
-      );
+      final credential = await _firebaseService.login(email, password);
+      if (credential.user != null) {
+        _currentUser = await _firebaseService.getUserProfile(credential.user!.uid);
+      }
       _error = null;
     } catch (e) {
       _error = e.toString();
@@ -45,7 +46,7 @@ class AuthProvider with ChangeNotifier {
   
   /// Register
   Future<void> register({
-    required String phoneNumber,
+    required String email,
     required String password,
     String? username,
   }) async {
@@ -54,11 +55,10 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
     
     try {
-      _currentUser = await _authService.register(
-        phoneNumber: phoneNumber,
-        password: password,
-        username: username,
-      );
+      final credential = await _firebaseService.register(email, password, username: username);
+      if (credential.user != null) {
+        _currentUser = await _firebaseService.getUserProfile(credential.user!.uid);
+      }
       _error = null;
     } catch (e) {
       _error = e.toString();
@@ -71,7 +71,7 @@ class AuthProvider with ChangeNotifier {
   
   /// Logout
   Future<void> logout() async {
-    await _authService.logout();
+    await _firebaseService.logout();
     _currentUser = null;
     notifyListeners();
   }
@@ -82,9 +82,10 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
     
     try {
-      final restored = await _authService.tryRestoreSession();
-      if (restored) {
-        _currentUser = _authService.currentUser;
+      // Firebase handles persistence automatically
+      final fb_auth.User? fbUser = fb_auth.FirebaseAuth.instance.currentUser;
+      if (fbUser != null) {
+        _currentUser = await _firebaseService.getUserProfile(fbUser.uid);
       }
     } catch (e) {
       print('Failed to restore session: $e');

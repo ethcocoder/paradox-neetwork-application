@@ -10,8 +10,11 @@ import 'services/messaging_service.dart';
 import 'services/offline_queue_service.dart';
 import 'services/local_latent_encoder.dart';
 import 'services/local_latent_decoder.dart';
+import 'services/firebase_service.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'providers/auth_provider.dart';
 import 'features/auth/screens/login_screen.dart';
+import 'features/auth/screens/register_screen.dart';
 import 'features/chat/screens/chat_list_screen.dart';
 import 'features/subscription/screens/subscription_screen.dart';
 
@@ -22,13 +25,21 @@ void main() async {
   final trafficManager = TrafficManager();
   final authService = AuthService(trafficManager);
   
+  // Initialize Firebase (Requires google-services.json)
+  try {
+    await Firebase.initializeApp();
+    print('🔥 Firebase Initialized');
+  } catch (e) {
+    print('⚠️ Firebase discovery failed - ensure google-services.json is present: $e');
+  }
+
   // CRITICAL: Initialize local encoder/decoder
-  // This ensures encoding happens ON DEVICE before sending
   final localEncoder = LocalLatentEncoder();
   final localDecoder = LocalLatentDecoder();
   await localEncoder.initialize();
   await localDecoder.initialize();
   
+  final firebaseService = FirebaseService(localEncoder);
   final messagingService = MessagingService(trafficManager, localEncoder);
   final offlineQueueService = OfflineQueueService();
   
@@ -42,6 +53,7 @@ void main() async {
         Provider.value(value: trafficManager),
         Provider.value(value: localEncoder),
         Provider.value(value: localDecoder),
+        Provider.value(value: firebaseService),
         Provider.value(value: messagingService),
         Provider.value(value: offlineQueueService),
         ChangeNotifierProvider(
@@ -65,7 +77,7 @@ class ParadoxNetworkApp extends StatelessWidget {
       home: const SplashScreen(),
       routes: {
         '/login': (context) => const LoginScreen(),
-        '/register': (context) => const LoginScreen(),
+        '/register': (context) => const RegisterScreen(),
         '/home': (context) => const ChatListScreen(),
         '/subscription': (context) => const SubscriptionScreen(),
       },

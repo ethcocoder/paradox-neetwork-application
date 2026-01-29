@@ -92,6 +92,8 @@ enum IntentType {
   textual,
   visual,
   audio,
+  video,
+  document,
   situational,
   temporal,
   emergency;

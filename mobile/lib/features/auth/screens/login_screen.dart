@@ -15,12 +15,12 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _phoneController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
 
   void _handleLogin() async {
-    if (_phoneController.text.isEmpty || _passwordController.text.isEmpty) return;
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) return;
     
     setState(() => _isLoading = true);
     
@@ -30,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final authProvider = context.read<AuthProvider>();
       await authProvider.login(
-        phoneNumber: _phoneController.text.trim(),
+        email: _emailController.text.trim(),
         password: _passwordController.text,
       );
       
@@ -126,9 +126,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   
                   // Input Fields
                   _MinimalInput(
-                    controller: _phoneController,
-                    hint: 'Phone Number',
-                    icon: Icons.phone_outlined,
+                    controller: _emailController,
+                    hint: 'Email Address',
+                    icon: Icons.email_outlined,
                   ),
                   
                   const SizedBox(height: 16),

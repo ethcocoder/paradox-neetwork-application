@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:paradox_network_app/theme/app_theme.dart';
 import 'package:paradox_network_app/services/messaging_service.dart';
 import 'package:paradox_network_app/services/local_latent_decoder.dart';
+import 'package:paradox_network_app/services/firebase_service.dart';
 import 'package:paradox_network_app/models/message_model.dart';
 
 class ChatDetailScreen extends StatefulWidget {
@@ -54,27 +55,26 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     _controller.clear();
     
     try {
-      await context.read<MessagingService>().sendTextMessage(
+      // Use Firebase for "for now" setup
+      final firebase = context.read<FirebaseService>();
+      await firebase.sendVectorMessage(
         receiverId: widget.contactId,
         text: text,
       );
-      // In a real app, we'd wait for the message to come back via WS or poll
-      // For MVP, we'll just add a local mock message
-      setState(() {
-        _messages.insert(0, Message(
-          messageId: DateTime.now().toString(),
-          senderId: 'me',
-          receiverId: widget.contactId,
-          intentType: IntentType.textual,
-          content: {'hint': text},
-          timestamp: DateTime.now(),
-          status: MessageStatus.sent,
-        ));
-      });
+      
+      // Local UI update is handled by the StreamBuilder (see expanded below)
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to send: $e')),
-      );
+      // Fallback to custom backend if Firebase is not fully configured
+      try {
+        await context.read<MessagingService>().sendTextMessage(
+          receiverId: widget.contactId,
+          text: text,
+        );
+      } catch (e2) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Delivery failed: $e2')),
+        );
+      }
     }
   }
 
@@ -124,14 +124,22 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       body: Column(
         children: [
           Expanded(
-            child: _isLoading 
-              ? const Center(child: CircularProgressIndicator())
-              : ListView.builder(
+            child: StreamBuilder<List<Message>>(
+              stream: context.read<FirebaseService>().getMessages(widget.contactId),
+              builder: (context, snapshot) {
+                final displayMessages = snapshot.data ?? _messages;
+                
+                if (_isLoading && displayMessages.isEmpty) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                
+                return ListView.builder(
                   reverse: true,
-                  itemCount: _messages.length,
+                  itemCount: displayMessages.length,
                   itemBuilder: (context, index) {
-                    final msg = _messages[index];
-                    final isMe = msg.senderId == 'me';
+                    final msg = displayMessages[index];
+                    final currentUser = context.read<AuthProvider>().currentUser;
+                    final isMe = msg.senderId == currentUser?.userId; 
                     
                     return Align(
                       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -145,25 +153,42 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                         constraints: BoxConstraints(
                           maxWidth: MediaQuery.of(context).size.width * 0.7,
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (msg.intentType == IntentType.visual)
-                              const Icon(Icons.image, color: Colors.white, size: 40)
-                            else
-                              Text(
-                                msg.content['hint'] ?? '',
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${msg.timestamp.hour}:${msg.timestamp.minute}',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.6),
-                                fontSize: 10,
-                              ),
-                            ),
-                          ],
+                        child: FutureBuilder<dynamic>(
+                          future: _reconstructMessage(msg),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              );
+                            }
+                            
+                            final content = snapshot.data;
+                            
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (msg.intentType == IntentType.visual)
+                                  content is Uint8List 
+                                    ? Image.memory(content, fit: BoxFit.cover)
+                                    : const Icon(Icons.image, color: Colors.white, size: 40)
+                                else
+                                  Text(
+                                    content ?? msg.content['hint'] ?? '',
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${msg.timestamp.hour}:${msg.timestamp.minute}',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.6),
+                                    fontSize: 10,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ),
                     );
@@ -224,5 +249,20 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         ),
       ),
     );
+  }
+
+  Future<dynamic> _reconstructMessage(Message msg) async {
+    if (msg.latentVector == null) return null;
+    
+    final decoder = context.read<LocalLatentDecoder>();
+    if (msg.intentType == IntentType.visual) {
+      return await decoder.decodeImage(msg.latentVector!);
+    } else if (msg.intentType == IntentType.video) {
+      return await decoder.decodeVideo(msg.latentVector!);
+    } else if (msg.intentType == IntentType.document) {
+      return await decoder.decodeDocument(msg.latentVector!);
+    } else {
+      return await decoder.decodeText(msg.latentVector!);
+    }
   }
 }

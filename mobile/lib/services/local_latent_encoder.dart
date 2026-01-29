@@ -3,12 +3,12 @@
 /// Raw data NEVER leaves the device - only latent vectors are sent
 
 import 'dart:typed_data';
-// import 'package:tflite_flutter/tflite_flutter.dart';
+import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
 
 class LocalLatentEncoder {
-  // Interpreter? _textEncoder;
-  // Interpreter? _imageEncoder;
+  Interpreter? _textEncoder;
+  Interpreter? _imageEncoder;
   
   static const int vectorDimension = 512;
   bool _isInitialized = false;
@@ -17,24 +17,35 @@ class LocalLatentEncoder {
   Future<void> initialize() async {
     if (_isInitialized) return;
     
-    // try {
-    //   // Load CLIP text encoder (converts text to 512D vector)
-    //   _textEncoder = await Interpreter.fromAsset(
-    //     'assets/models/clip_text_encoder.tflite',
-    //   );
-    //   
-    //   // Load CLIP image encoder (converts image to 512D vector)
-    //   _imageEncoder = await Interpreter.fromAsset(
-    //     'assets/models/clip_image_encoder.tflite',
-    //   );
-    //   
-    //   _isInitialized = true;
-    //   print('✅ Local latent encoder initialized');
-    // } catch (e) {
-    //   print('⚠️  TFLite models not found, using fallback encoder');
-    //   // Fallback to lightweight encoding (see below)
-    //   _isInitialized = true;
-    // }
+    try {
+      // Use Hardware Acceleration if available (NNAPI for Android)
+      final options = InterpreterOptions();
+      try {
+        // This makes inference 5x-10x faster
+        options.addDelegate(NnapiDelegate()); 
+      } catch (e) {
+        print('NNAPI not available, using CPU');
+      }
+
+      // Load CLIP text encoder
+      _textEncoder = await Interpreter.fromAsset(
+        'assets/models/clip_text_encoder.tflite',
+        options: options,
+      );
+      
+      // Load CLIP image encoder
+      _imageEncoder = await Interpreter.fromAsset(
+        'assets/models/clip_image_encoder.tflite',
+        options: options,
+      );
+      
+      _isInitialized = true;
+      print('✅ Local latent encoder initialized');
+    } catch (e) {
+      print('⚠️  TFLite models not found, using fallback encoder: $e');
+      // Fallback to lightweight encoding (see below)
+      _isInitialized = true;
+    }
     _isInitialized = true;
   }
   
@@ -43,12 +54,12 @@ class LocalLatentEncoder {
   Future<List<double>> encodeText(String text) async {
     await initialize();
     
-    // if (_textEncoder != null) {
-    //   return _encodeTextWithCLIP(text);
-    // } else {
+    if (_textEncoder != null) {
+      return _encodeTextWithCLIP(text);
+    } else {
       // Fallback: Simple hash-based encoding
       return _fallbackTextEncoding(text);
-    // }
+    }
   }
   
   /// Encode image to latent vector (512D)
@@ -56,53 +67,69 @@ class LocalLatentEncoder {
   Future<List<double>> encodeImage(Uint8List imageBytes) async {
     await initialize();
     
-    // if (_imageEncoder != null) {
-    //   return _encodeImageWithCLIP(imageBytes);
-    // } else {
+    if (_imageEncoder != null) {
+      return _encodeImageWithCLIP(imageBytes);
+    } else {
       // Fallback: Perceptual hash encoding
       return _fallbackImageEncoding(imageBytes);
-    // }
+    }
+  }
+
+  /// Encode video to latent vector
+  Future<List<double>> encodeVideo(Uint8List videoBytes) async {
+    await initialize();
+    // Implementation: Extract keyframes and encode them
+    // For now, use fallback
+    return _fallbackVideoEncoding(videoBytes);
+  }
+
+  /// Encode documents (PDF, DOCX) to latent vector
+  Future<List<double>> encodeDocument(Uint8List docBytes) async {
+    await initialize();
+    // Implementation: Extract structural semantics
+    // For now, use fallback
+    return _fallbackDocumentEncoding(docBytes);
   }
   
   // ==================== CLIP-based Encoding ====================
   
-  // Future<List<double>> _encodeTextWithCLIP(String text) async {
-  //   // Tokenize text (simplified - real implementation would use CLIP tokenizer)
-  //   final tokens = _tokenizeText(text);
-  //   
-  //   // Create input tensor [1, max_length]
-  //   final input = [tokens];
-  //   
-  //   // Create output tensor [1, 512]
-  //   final output = List.filled(1, List<double>.filled(vectorDimension, 0.0));
-  //   
-  //   // Run inference
-  //   _textEncoder!.run(input, output);
-  //   
-  //   // Return normalized vector
-  //   return _normalize(output[0]);
-  // }
-  // 
-  // Future<List<double>> _encodeImageWithCLIP(Uint8List imageBytes) async {
-  //   // Decode image
-  //   final image = img.decodeImage(imageBytes);
-  //   if (image == null) throw Exception('Failed to decode image');
-  //   
-  //   // Resize to 224x224 (CLIP input size)
-  //   final resized = img.copyResize(image, width: 224, height: 224);
-  //   
-  //   // Convert to normalized float array [1, 224, 224, 3]
-  //   final input = _imageToTensor(resized);
-  //   
-  //   // Create output tensor [1, 512]
-  //   final output = List.filled(1, List<double>.filled(vectorDimension, 0.0));
-  //   
-  //   // Run inference
-  //   _imageEncoder!.run(input, output);
-  //   
-  //   // Return normalized vector
-  //   return _normalize(output[0]);
-  // }
+  Future<List<double>> _encodeTextWithCLIP(String text) async {
+    // Tokenize text
+    final tokens = _tokenizeText(text);
+    
+    // Create input tensor [1, 77]
+    final input = [tokens];
+    
+    // Create output tensor [1, 512]
+    final output = List.filled(1, List<double>.filled(vectorDimension, 0.0));
+    
+    // Run inference
+    _textEncoder!.run(input, output);
+    
+    // Return normalized vector
+    return _normalize(output[0]);
+  }
+  
+  Future<List<double>> _encodeImageWithCLIP(Uint8List imageBytes) async {
+    // Decode image
+    final image = img.decodeImage(imageBytes);
+    if (image == null) throw Exception('Failed to decode image');
+    
+    // Resize to 224x224 (CLIP input size)
+    final resized = img.copyResize(image, width: 224, height: 224);
+    
+    // Convert to normalized float array [1, 224, 224, 3]
+    final input = _imageToTensor(resized);
+    
+    // Create output tensor [1, 512]
+    final output = List.filled(1, List<double>.filled(vectorDimension, 0.0));
+    
+    // Run inference
+    _imageEncoder!.run(input, output);
+    
+    // Return normalized vector
+    return _normalize(output[0]);
+  }
   
   // ==================== Fallback Encoding (when no model) ====================
   
@@ -147,6 +174,24 @@ class LocalLatentEncoder {
       }
     }
     
+    return _normalize(vector);
+  }
+
+  List<double> _fallbackVideoEncoding(Uint8List videoBytes) {
+    final vector = List<double>.filled(vectorDimension, 0.0);
+    final hash = videoBytes.length.hashCode;
+    for (int i = 0; i < vectorDimension; i++) {
+      vector[i] = _hashToDouble(hash + i);
+    }
+    return _normalize(vector);
+  }
+
+  List<double> _fallbackDocumentEncoding(Uint8List docBytes) {
+    final vector = List<double>.filled(vectorDimension, 0.0);
+    final hash = docBytes.length.hashCode ^ 0xDOC;
+    for (int i = 0; i < vectorDimension; i++) {
+      vector[i] = _hashToDouble(hash + i);
+    }
     return _normalize(vector);
   }
   
