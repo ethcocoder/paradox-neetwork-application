@@ -35,7 +35,7 @@ const env = {
   logoUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663323745332/HRsSvgqrteEcScRs.png",
   scheme: schemeFromBundleId,
   iosBundleId: bundleId,
-  androidPackage: bundleId,
+  androidPackage: "com.example.paradox_network_app",
 };
 
 const config: ExpoConfig = {

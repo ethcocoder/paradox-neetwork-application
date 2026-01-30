@@ -95,7 +95,7 @@ export function useAuth(options?: UseAuthOptions) {
 
     if (!user && !inAuthGroup) {
       // Redirect to login if not authenticated
-      router.replace("/login");
+      router.replace("/(auth)/login");
     } else if (user && inAuthGroup) {
       // Redirect to home if authenticated
       router.replace("/(tabs)");

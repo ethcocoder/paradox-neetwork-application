@@ -6,9 +6,9 @@
 - [x] Firestore database integration
 - [x] User profile management
 - [x] Conversation list screen
-- [ ] Chat screen with message display
+- [x] Chat screen with message display
 - [ ] Image clipper feature
-- [ ] Text input with encoding
+- [x] Text input with encoding
 - [x] Local latent encoder (text) with TFLite
 - [x] Local latent encoder (image) with TFLite
 - [x] Local latent decoder (text)
@@ -25,11 +25,11 @@
 - [x] Splash screen with branding
 - [x] Authentication screen design
 - [x] Home screen with conversation list
-- [ ] Chat screen with message bubbles
+- [x] Chat screen with message bubbles
 - [ ] Image clipper UI
-- [ ] Text input screen
+- [x] Text input screen
 - [ ] Settings screen
-- [ ] Profile screen
+- [x] Profile screen
 - [ ] Theme toggle (light/dark)
 - [ ] Notification settings
 - [x] Bandwidth savings indicator
