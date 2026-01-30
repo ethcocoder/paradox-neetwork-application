@@ -4,7 +4,12 @@ const { withNativeWind } = require("nativewind/metro");
 const config = getDefaultConfig(__dirname);
 
 // Add .tflite to asset extensions
-config.resolver.assetExts.push("tflite");
+if (!config.resolver.assetExts.includes("tflite")) {
+  config.resolver.assetExts.push("tflite");
+}
+
+// Ensure .tflite is NOT in sourceExts
+config.resolver.sourceExts = config.resolver.sourceExts.filter(ext => ext !== "tflite");
 
 module.exports = withNativeWind(config, {
   input: "./global.css",
