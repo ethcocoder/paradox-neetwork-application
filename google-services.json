@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "349632549805",
+    "project_id": "paradox-network-2d479",
+    "storage_bucket": "paradox-network-2d479.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:349632549805:android:e5ce70e168049ef4710724",
+        "android_client_info": {
+          "package_name": "com.example.paradox_network_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDniENuSOGDrMCp4MkbZ6nw8BI_K3Jkt2c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -2,29 +2,29 @@
 
 ## Core Features
 
-- [ ] Firebase authentication setup (email/password)
-- [ ] Firestore database integration
-- [ ] User profile management
-- [ ] Conversation list screen
+- [x] Firebase authentication setup (email/password)
+- [x] Firestore database integration
+- [x] User profile management
+- [x] Conversation list screen
 - [ ] Chat screen with message display
 - [ ] Image clipper feature
 - [ ] Text input with encoding
-- [ ] Local latent encoder (text)
-- [ ] Local latent encoder (image)
-- [ ] Local latent decoder (text)
-- [ ] Local latent decoder (image)
-- [ ] Message sending with encoded vectors
-- [ ] Message receiving and decoding
+- [x] Local latent encoder (text) with TFLite
+- [x] Local latent encoder (image) with TFLite
+- [x] Local latent decoder (text)
+- [x] Local latent decoder (image)
+- [x] Message sending with encoded vectors
+- [x] Message receiving and decoding
 - [ ] Offline queue support
-- [ ] Pull-to-refresh functionality
+- [x] Pull-to-refresh functionality
 - [ ] Search conversations
 - [ ] Delete conversation option
 
 ## UI/UX Features
 
-- [ ] Splash screen with branding
-- [ ] Authentication screen design
-- [ ] Home screen with conversation list
+- [x] Splash screen with branding
+- [x] Authentication screen design
+- [x] Home screen with conversation list
 - [ ] Chat screen with message bubbles
 - [ ] Image clipper UI
 - [ ] Text input screen
@@ -32,7 +32,7 @@
 - [ ] Profile screen
 - [ ] Theme toggle (light/dark)
 - [ ] Notification settings
-- [ ] Bandwidth savings indicator
+- [x] Bandwidth savings indicator
 - [ ] Loading indicators
 - [ ] Error messages
 - [ ] Empty states
@@ -40,18 +40,18 @@
 ## Firebase Integration
 
 - [x] Firebase config setup
-- [ ] Authentication module
-- [ ] Firestore listeners
-- [ ] Message persistence
-- [ ] User data sync
-- [ ] Real-time updates
+- [x] Authentication module
+- [x] Firestore listeners
+- [x] Message persistence
+- [x] User data sync
+- [x] Real-time updates
 
 ## Technical Implementation
 
-- [ ] Latent encoder service
-- [ ] Latent decoder service
-- [ ] Message encoding pipeline
-- [ ] Message decoding pipeline
+- [x] Latent encoder service (TFLite integration)
+- [x] Latent decoder service
+- [x] Message encoding pipeline
+- [x] Message decoding pipeline
 - [ ] Local storage setup
 - [ ] Offline sync mechanism
 - [ ] API client configuration
@@ -79,6 +79,6 @@
 
 - [ ] Build Android APK
 - [ ] Test on real Android device
-- [ ] Push to GitHub React branch
+- [x] Push to GitHub React branch
 - [ ] Create release notes
 - [ ] Document API usage

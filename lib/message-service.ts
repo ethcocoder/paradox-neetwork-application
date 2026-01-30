@@ -9,7 +9,7 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import { db } from "./firebase-auth";
-import { encodeText, encodeImage, estimateBandwidthSavings } from "./latent-encoder";
+import { encodeText, encodeImage } from "./latent-encoder";
 import { decodeText, decodeImage } from "./latent-decoder";
 import { COLLECTIONS } from "./firebase-config";
 
@@ -31,6 +31,16 @@ export interface DecodedMessage extends EncodedMessage {
   decodedContent: string | { description: string; colorProfile: any };
 }
 
+const VECTOR_DIMENSION = 512;
+
+function estimateBandwidthSavings(originalSize: number) {
+  const encodedSize = VECTOR_DIMENSION * 4; // Assuming float32
+  return {
+    encodedSize,
+    savingsPercent: ((originalSize - encodedSize) / originalSize) * 100,
+  };
+}
+
 /**
  * Send an encoded text message
  */
@@ -41,8 +51,7 @@ export async function sendTextMessage(
   text: string
 ): Promise<EncodedMessage> {
   try {
-    // Encode text to latent vector
-    const latentVector = encodeText(text);
+    const latentVector = await encodeText(text);
     const originalSize = new TextEncoder().encode(text).length;
     const { encodedSize, savingsPercent } = estimateBandwidthSavings(originalSize);
 
@@ -59,7 +68,6 @@ export async function sendTextMessage(
       isRead: false,
     };
 
-    // Save to Firestore
     const docRef = await addDoc(collection(db, COLLECTIONS.MESSAGES), {
       ...message,
       timestamp: Timestamp.fromDate(message.timestamp),
@@ -79,12 +87,12 @@ export async function sendImageMessage(
   conversationId: string,
   senderId: string,
   receiverId: string,
-  imageData: Uint8Array
+  imageUri: string,
+  imageSize: number
 ): Promise<EncodedMessage> {
   try {
-    // Encode image to latent vector
-    const latentVector = encodeImage(imageData);
-    const originalSize = imageData.length;
+    const latentVector = await encodeImage(imageUri);
+    const originalSize = imageSize;
     const { encodedSize, savingsPercent } = estimateBandwidthSavings(originalSize);
 
     const message: EncodedMessage = {
@@ -100,7 +108,6 @@ export async function sendImageMessage(
       isRead: false,
     };
 
-    // Save to Firestore
     const docRef = await addDoc(collection(db, COLLECTIONS.MESSAGES), {
       ...message,
       timestamp: Timestamp.fromDate(message.timestamp),
@@ -145,18 +152,14 @@ export async function fetchConversationMessages(
         isRead: data.isRead,
       };
 
-      // Decode message
       let decodedContent;
       if (data.messageType === "text") {
-        decodedContent = decodeText(data.latentVector);
+        decodedContent = await decodeText(data.latentVector);
       } else {
-        decodedContent = decodeImage(data.latentVector);
+        decodedContent = await decodeImage(data.latentVector);
       }
 
-      messages.push({
-        ...message,
-        decodedContent,
-      });
+      messages.push({ ...message, decodedContent });
     }
 
     return messages;
@@ -179,9 +182,8 @@ export function listenToMessages(
     orderBy("timestamp", "asc")
   );
 
-  const unsubscribe = onSnapshot(q, (querySnapshot) => {
+  return onSnapshot(q, async (querySnapshot) => {
     const messages: DecodedMessage[] = [];
-
     for (const doc of querySnapshot.docs) {
       const data = doc.data() as any;
       const message: EncodedMessage = {
@@ -198,57 +200,14 @@ export function listenToMessages(
         isRead: data.isRead,
       };
 
-      // Decode message
       let decodedContent;
       if (data.messageType === "text") {
-        decodedContent = decodeText(data.latentVector);
+        decodedContent = await decodeText(data.latentVector);
       } else {
-        decodedContent = decodeImage(data.latentVector);
+        decodedContent = await decodeImage(data.latentVector);
       }
-
-      messages.push({
-        ...message,
-        decodedContent,
-      });
+      messages.push({ ...message, decodedContent });
     }
-
     callback(messages);
   });
-
-  return unsubscribe;
-}
-
-/**
- * Get conversation statistics
- */
-export async function getConversationStats(
-  conversationId: string
-): Promise<{
-  totalMessages: number;
-  totalBandwidthSaved: number;
-  averageSavingsPercent: number;
-}> {
-  try {
-    const messages = await fetchConversationMessages(conversationId);
-
-    const totalMessages = messages.length;
-    const totalBandwidthSaved = messages.reduce(
-      (sum, msg) => sum + (msg.originalSize - msg.encodedSize),
-      0
-    );
-    const averageSavingsPercent =
-      messages.length > 0
-        ? messages.reduce((sum, msg) => sum + msg.bandwidthSavingsPercent, 0) /
-          messages.length
-        : 0;
-
-    return {
-      totalMessages,
-      totalBandwidthSaved,
-      averageSavingsPercent,
-    };
-  } catch (error) {
-    console.error("Error getting conversation stats:", error);
-    throw error;
-  }
 }
