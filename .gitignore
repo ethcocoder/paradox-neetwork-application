@@ -2,7 +2,7 @@
 *.zip
 *.tar.gz
 *.iso
-*.tflite
+
 metadata.json
 
 # Build artifacts
