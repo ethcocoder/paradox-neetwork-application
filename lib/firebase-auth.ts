@@ -1,27 +1,6 @@
-import { initializeApp } from "firebase/app";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  User,
-  setPersistence,
-  browserLocalPersistence,
-} from "firebase/auth";
-import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
-import { firebaseConfig } from "./firebase-config";
+import { Platform } from "react-native";
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-
-// Set persistence to local (for mobile apps)
-setPersistence(auth, browserLocalPersistence).catch((error) => {
-  console.error("Error setting persistence:", error);
-});
-
+// Types for consistency
 export interface UserProfile {
   uid: string;
   email: string;
@@ -29,6 +8,42 @@ export interface UserProfile {
   createdAt: Date;
   avatar?: string;
 }
+
+// We'll export these variables which will be initialized based on the platform
+let auth: any;
+let db: any;
+let firebaseAuth: any; // The module itself for auth methods
+let firebaseFirestore: any; // The module itself for firestore methods
+
+// Platform-specific initialization
+if (Platform.OS === "web") {
+  // Web: Use JS SDK
+  const { initializeApp, getApp, getApps } = require("firebase/app");
+  const { getAuth, initializeAuth, browserLocalPersistence } = require("firebase/auth");
+  const { getFirestore } = require("firebase/firestore");
+  const { firebaseConfig } = require("./firebase-config");
+
+  const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+  auth = getAuth(app);
+  db = getFirestore(app);
+
+  // Auth methods from JS SDK
+  firebaseAuth = require("firebase/auth");
+  firebaseFirestore = require("firebase/firestore");
+} else {
+  // Mobile: Use Native SDK (@react-native-firebase)
+  const nativeAuth = require("@react-native-firebase/auth").default;
+  const nativeFirestore = require("@react-native-firebase/firestore").default;
+
+  auth = nativeAuth();
+  db = nativeFirestore();
+
+  // Auth methods from Native SDK
+  firebaseAuth = require("@react-native-firebase/auth").default;
+  firebaseFirestore = require("@react-native-firebase/firestore").default;
+}
+
+export { auth, db };
 
 /**
  * Sign up a new user with email and password
@@ -39,12 +54,15 @@ export async function signUp(
   displayName: string
 ): Promise<UserProfile> {
   try {
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-    const user = userCredential.user;
+    let user;
+    if (Platform.OS === "web") {
+      const { createUserWithEmailAndPassword } = firebaseAuth;
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      user = userCredential.user;
+    } else {
+      const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+      user = userCredential.user;
+    }
 
     // Create user profile in Firestore
     const userProfile: UserProfile = {
@@ -54,7 +72,12 @@ export async function signUp(
       createdAt: new Date(),
     };
 
-    await setDoc(doc(db, "users", user.uid), userProfile);
+    if (Platform.OS === "web") {
+      const { doc, setDoc } = firebaseFirestore;
+      await setDoc(doc(db, "users", user.uid), userProfile);
+    } else {
+      await db.collection("users").doc(user.uid).set(userProfile);
+    }
 
     return userProfile;
   } catch (error) {
@@ -71,15 +94,33 @@ export async function signIn(
   password: string
 ): Promise<UserProfile> {
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
+    let user;
+    if (Platform.OS === "web") {
+      const { signInWithEmailAndPassword } = firebaseAuth;
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      user = userCredential.user;
+    } else {
+      const userCredential = await auth.signInWithEmailAndPassword(email, password);
+      user = userCredential.user;
+    }
 
     // Fetch user profile from Firestore
-    const userDocRef = doc(db, "users", user.uid);
-    const userDocSnap = await getDoc(userDocRef);
+    let data;
+    if (Platform.OS === "web") {
+      const { doc, getDoc } = firebaseFirestore;
+      const userDocSnap = await getDoc(doc(db, "users", user.uid));
+      if (userDocSnap.exists()) {
+        data = userDocSnap.data();
+      }
+    } else {
+      const userDocSnap = await db.collection("users").doc(user.uid).get();
+      if (userDocSnap.exists) {
+        data = userDocSnap.data();
+      }
+    }
 
-    if (userDocSnap.exists()) {
-      return userDocSnap.data() as UserProfile;
+    if (data) {
+      return data as UserProfile;
     } else {
       throw new Error("User profile not found");
     }
@@ -94,7 +135,12 @@ export async function signIn(
  */
 export async function signOutUser(): Promise<void> {
   try {
-    await signOut(auth);
+    if (Platform.OS === "web") {
+      const { signOut } = firebaseAuth;
+      await signOut(auth);
+    } else {
+      await auth.signOut();
+    }
   } catch (error) {
     console.error("Sign out error:", error);
     throw error;
@@ -109,12 +155,21 @@ export async function getCurrentUserProfile(): Promise<UserProfile | null> {
   if (!user) return null;
 
   try {
-    const userDocRef = doc(db, "users", user.uid);
-    const userDocSnap = await getDoc(userDocRef);
-
-    if (userDocSnap.exists()) {
-      return userDocSnap.data() as UserProfile;
+    let data;
+    if (Platform.OS === "web") {
+      const { doc, getDoc } = firebaseFirestore;
+      const userDocSnap = await getDoc(doc(db, "users", user.uid));
+      if (userDocSnap.exists()) {
+        data = userDocSnap.data();
+      }
+    } else {
+      const userDocSnap = await db.collection("users").doc(user.uid).get();
+      if (userDocSnap.exists) {
+        data = userDocSnap.data();
+      }
     }
+
+    if (data) return data as UserProfile;
   } catch (error) {
     console.error("Error fetching user profile:", error);
   }
@@ -126,9 +181,14 @@ export async function getCurrentUserProfile(): Promise<UserProfile | null> {
  * Listen to authentication state changes
  */
 export function onAuthStateChange(
-  callback: (user: User | null) => void
+  callback: (user: any | null) => void
 ): () => void {
-  return onAuthStateChanged(auth, callback);
+  if (Platform.OS === "web") {
+    const { onAuthStateChanged } = firebaseAuth;
+    return onAuthStateChanged(auth, callback);
+  } else {
+    return auth.onAuthStateChanged(callback);
+  }
 }
 
 /**
